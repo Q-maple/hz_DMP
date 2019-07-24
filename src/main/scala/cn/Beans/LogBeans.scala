@@ -180,5 +180,6 @@ case class LogBeans(
   override def productArity: Int = 85
 
   override def canEqual(that: Any): Boolean = that.isInstanceOf[LogBeans]
+
 }
 
