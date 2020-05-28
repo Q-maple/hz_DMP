@@ -1,0 +1,54 @@
+1. redis的持久化（重点）
+	RDB：间隔性存储，通过设置save这个参数，当达到它的设置条件时候，会进行持久化，但是它的持久化频率不会很高，对于那些数据要求完整性不高的，可以进行使用这种持久化机制，有弊端：如果当我们操作没有达到要求的时候，或者时间达到，那么此时如果数据库发生宕机，数据会丢失的（丢失还没有做持久化的数据）
+	AOF：执行效率低，因为它不是快照式存储，是对每一条数据的命令进行存储，也就是说没操作一次就存储一下，这样如果我们操作频次比较高的话，那么它的存储频次就更高了，相比较RDB的方式，这种方式适用于对数据完整性要求较高的
+	//redis保存kafkaoffset是需要开启aof模式/即每次写入都保存
+	
+	如果我们在设置了持久化机制两种都有，那么它也会进行两种机制的存储，但是如果一旦数据发生丢失，要进行持久化恢复的时候，那么会首选以AOF的文件为主进行恢复。
+	
+2. redis集群原理（了解）
+
+
+3. 源码分析（重点->为了后面的面试吹做准备）
+	Spark-Submit脚本->提交模式
+	YARN | STANDALONE | MESOS | LOCAL
+	YARN又分为：CLIENT | CLUSTER
+	
+	1. 通过SparkContext进行初始化对象
+	2. 当遇到Action算子进行提交Job任务（sc.runJob）
+	3. 找到DAGScheduler.runJob方法（提交任务的初始位置）
+	4. 通过submitJob方法，进行任务处理，它根据任务的顺序，进行执行（阻塞线程）
+	5. 根据内部的doOnReceive方法进行事件任务的执行（JobId）
+	6. 找到DAG内部的执行Job匹配方法，匹配Stage划分操作
+	7. 首先创建一个结果Stage（倒推模式-> 从ResultStage往前推）
+	8. ResultStage具体是划分RDD的依赖（划分父RDD的所有依赖）
+	9. 通过ResultStage将所有依赖逻辑上划分，然后通过Visit方法进行具体实施
+	10. visit方法进行递归式调用自己，不断处理有依赖的RDD
+	11 当多有父RDD都划分完成后，这个时候，会通过submitStage提交多有stage阶段
+	12. 通过submitMissingTasks，内部进行划分Task（首先是通过shuffleMapStage和ResultStage创建ShuffleMapTask和ResultTask对象）
+	13.然后判断是否有Task的提交，通过内部的TaskSchedule.submitTasks方法提交至TaskSchedule上面
+	14 划分本地化级别（五种）根据级别划分后，将所有Task 任务封装到数据
+	15. 通过HasLauncheTask（句柄）进行发送至Worker上面
+	16. Worker上面的Executor内部会执行反序列化，通过launchTask反序列化操作
+	17. 每次执行Task任务都会进行同步代码块，然后一批次的运行Task（一批次数量取决于并行度）
+	
+4. redis管理Offset（掌握）
+
+5. Spark On Yarn
+	Client模式：如果运行Spark-Shell这个命令行的话，只能在这个上面 （客户端模式）
+	1. 通过客户端进行提交至集群
+	2. RM接收到Client发来的消息请求
+	3. RM分配任务给NM，启动APPmaster
+	4. Driver在Client客户机启动，监控这个APPMaster
+	5. NM启动Container，在内部进行任务运行（Executor）
+	6. RM还是负责资源分配，NM还是负责运行，APPmaster被Client进行监控状态
+	
+	
+	Cluster模式：（集群模式）
+	1. 通过本机进行提交任务到集群（Spark On Yarn）
+	2. RM接收到client发来的请求，进行处理
+	3. RM分配给NM的APPMater任务
+	4. NM接收到这个任务后启动对应Container，运行APPMaster
+	5. APPMaster其实就相当于Driver端，运行在NM内部
+	6. APPMaster负责和任务进行交互（监控状态）
+	7. RM后续如果还有任务提交进来，继续分配给NM进行执行
+	8. RM负责任务调度，NM内部的Container负责运行

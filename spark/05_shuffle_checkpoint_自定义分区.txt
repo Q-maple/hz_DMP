@@ -1,0 +1,22 @@
+1. shuffle
+	HashShuffle（原始的版本，在2.0以后被移除）
+	sortShuffle（1.6以后变成主流的shuffle）
+	普通默认机制
+	Bypass机制（HashShuffle类似）
+	钨丝shuffle（2.0以后合并到sortShuffle分支上）
+2. Checkpoint
+	检查点
+	应用场景：如果我们算子转换的非常多，很费时间，并且内存较少，有时候数据量很大的话，就可能会挂掉（任务）,那么就需要重新计算，资源消耗过多，并且花费时间，可以在某一个shuffle算子后面适当的做一个检查点，保证程序失败的话，直接恢复数据
+
+3. Task原理
+
+
+4. 自定义排序
+	二次排序（继承Ordered或者Ordering）
+	
+5. 自定义分区
+	HashPartition（Hash取模的方式），不可以转换负数，强制转换成正数，会产生Hash碰撞
+	RangePartition（SortBy、SortByKey）这种分区方式比较少用，（一个范围性分区）（了解）
+	自定义的分区类传入的参数为需要比较的值,而需要分区的数据.重写的getpartitioned方法中的key会对需要分区的数据进行自动获取
+	
+	自定义分区可以解决HashPartition的hash碰撞的问题，需要继承Partitioner分区器，内部分区方式，自己编写，传入自定义分区的时候，找到能接受的算子，如果不行的话，就PartitionBy算子

@@ -1,0 +1,10 @@
+1. Akka模拟Spark通信
+	1. 编写Master类
+	2. 编写Worker类
+	3. 都要实现Akka的ActorSystem对象
+	4. 双方发送消息
+
+2. Netty模型
+	1. Netty模型内部可以实现Server 和 Client，而Akka需要创建两个Actor分别实现其Server和Client
+	2. Akka在Spark2.0版本以后被弃用，因为Spark的版本迭代很快，但是Akka对应的版本跟Spark的底层通信，有差异，导致Akka版本低而Spark版本高，这样如果还用Akka版本的话，就导致Spark无法升级到更高版本。
+	

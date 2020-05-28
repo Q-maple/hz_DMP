@@ -1,0 +1,33 @@
+1. Kafka文件传输机制（重点）
+	Kafka内部的分区是有容错性，它是多副本的，如果当一主分区挂了，从分区顶替之前的主分区，进行读写操作，其他副本继续进行容错。
+
+2. Spark Streaming简介
+	1. 易用性 ：可以使用多种语言开发
+	2. 容错性 ：可以恢复丢失的任务或者操作状态（滑动窗口），并且不需要编写多余的代码
+	3. 交互性 ：可以和其他组件进行交互，并且在内部可以实现一种流式的交互
+	原理：通过SparkStreaming输入的数据流，将这个流切成每个批次的结果数据，然后不断的循环内部代码，循环的间隔由用户设定（时间），每个批次都会有结果产生，如果流没数据了，那么这个批次结果将空，程序会不断执行（7*24小时）
+3. DStream（离散流）（重点）
+	DStream是Spark Core的API一种实现，通过流的形式，来计算一个批次的RDD结果集，最后每个批次的结果集相当于每个批次的DStream
+	
+	SparkStreaming其实就一种Spark提供的对大数据的实时计算的框架，它的底层实现是咱们学的SparkCore，底层的核心换成了DStream，DStream流式处理的概念
+	
+	原理：看图
+4. Spark Streaming入门
+	入门案例（看代码）
+	
+	需要注意要点
+	1、只要一个StreamingContext启动之后，就不能再往其中添加任何计算逻辑了。比如执行start()方法之后，还给某个DStream执行一个算子。
+	2、一个StreamingContext停止之后，是肯定不能够重启的。调用stop()之后，不能再调用start()
+	3、一个JVM同时只能有一个StreamingContext启动。在你的应用程序中，不能创建两个StreamingContext。
+	4、调用stop()方法时，会同时停止内部的SparkContext，如果不希望如此，还希望后面继续使用SparkContext注意的要点：
+		创建其他类型的Context，比如SQLContext，那么就用stop(false)。
+	5、一个SparkContext可以创建多个StreamingContext，只要上一个先用stop(false)停止，再创建下一个即可。
+
+
+5. Kafka连接SparkStreaming（两种方式）
+	第一种最原始方式（Receive方式）了解
+	这种方式是最老的方式，使用的是高级API来处理数据的，receive方式从kafka获取数据，都是存放在executor当中的，然后SparkStreaming启动job去拉取这些数据，在这种方式，我们处理数据，会很多，因为用高级API来处理的话，等于消费两份数据（WAL预写机制），这样效率很低，但是很安全，并且编写的API比较简单，因为我们在做处理的时候，跟不需要考虑Kafka的Offset的问题，内部会进行Offset的维护。
+	
+	第二种 Direct方式（直连方式）
+	
+	

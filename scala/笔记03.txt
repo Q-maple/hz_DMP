@@ -1,0 +1,188 @@
+1. 高阶函数
+	1. 闭包：函数在变量不处于其有效作用域的时候，还能够对变量进行访问，就是闭包。
+	2. 柯里化：将原来接收两个参数的方法，转换为接收一个参数，得到一个新的函数的形式，即为柯里化
+	def sum(a:Int)=(b:Int)=>a+b
+	这种写法叫做柯里化，内部实现原理叫闭包。
+			def f1(name: String, age: Int): Unit = {print(name + " " + age)}
+			def f2(name:String) = (age:Int) => print("his name is " + name, "he is " + age + "years old.")
+	3. 偏函数（放在模式匹配中讲）
+	4. 隐式转换（比较难理解，会单独抽出来讲）
+2. 集合（重点）
+	Scala的集合体系
+		主要包括：Iterable ---> (Seq、Set、Map)
+		集合也分为可变集合和不可变集合这两种。可变集合就是可以修改里面的元素，不可变集合表示初始化元素之后，就不能修改了，分别对应scala.collection.mutable和scala.collection.immutable两个包。
+		其中Seq包括：Array /Range /Vector /ListBuffer /Queue /Stack /Stream
+		Set : HashSet /TreeSet
+		Map : HashMap /TreeMap
+
+		1. List  --> (List是不可变的,使用::等添加元素时会生成新的LIst副本,而不会修改原listBuffer是可变的) 而Array是可变的
+		取头部 head
+		取头部以外的元素 tail
+		list有特殊的操作符::
+		Nil代表空集合
+		对集合排序：sorted sortWith sortBy
+				sorted : 直接排序默认升序 (可以使用.reverse进行反转)
+				sortWith : sortWith( _ > _) 降序
+				sortBy :  val l1 = List(("leo",18),("tom",16),("kan",17))   --->    l1.sortBy(_._2)
+		分组：grouped（x） 会返回一个Map   
+				l1.groupBy(_._1)
+				Map[String,List[(String, Int)]] = Map(kan -> List((kan,17)), leo -> List((leo,18)), tom -> List((tom,16)))
+		list可以随意转换成迭代器（iterator）同理，迭代器也可以转换为集合
+		
+		2. Set 唯一性
+		HashSet（可变和不可变）
+		LinkedHashSet 记录元素插入顺序
+		SortedSet 会根据Key进行自动排序  ---> (里面的值需要时同一种类型)
+		-=  +=  add  remove ...
+		
+		3. Scala WC 
+				//导入资源
+				  val file = Source.fromFile("H:\\1.txt")
+				  //读取后会将换行符取消,将文档整合成为一行
+				  // val strings: Iterator[String] = file.getLines()
+				  //保持原格式输出
+				  val strings: String = file.mkString
+				  val lines_list = List(strings)
+				  //将文件内容压平输出为list
+				  val words = lines_list.flatMap(_.split("\\s+"))
+				  //过滤空值
+				  val list = words.filter(_ != "")
+				  //将list中单个元素转换为key/v以tuple格式存储在list中
+				  val simple_kv: List[(String, Int)] = words.map((_,1))
+				  //以相同key分组,将原kv作为value迭代器作为分组key的value
+				  val kv_itrator: Map[String, List[(String, Int)]] = simple_kv.groupBy(_._1)
+				  //mapvalues 只会对于value进行处理但是其是携带有key的,所以其返回的结果含有key
+				  val word_counts: Map[String, Int] = kv_itrator.mapValues(_.size)
+				  //将Map类型数据转换为list类型数据
+				  val wc_list: List[(String, Int)] = word_counts.toList
+				  val words_list: List[(String, Int)] = wc_list.sortBy(_._2).reverse
+				  words_list.foreach(print)
+		4. 
+		reduce ： 聚合计算方法 
+		par ：并行计算方法   并行 : 几个线程同时运行   并发 : 多个线程争夺计算资源,获得资源的运行否则等待继续抢夺
+		fold : 添加计算室 的初始值,如果并行计算,那么每一个线程都会加上一个初始值
+		交并差集
+		交并差集
+		union
+		intersect
+		diff
+		
+		List(1,2,3,4,5)
+		需求：用递归方式类给List中每个元素都加上指定的前缀“+++”，然后输出打印
+				 def getAgain(list:List[Int],word:String): Unit = {
+				if (list != Nil) {
+				  val new_word = word + list.head
+				  getAgain(list.tail,word)
+				  println(new_word)
+				}
+
+				  }
+				}
+				object orFun extends App {
+				  val list = List(1,2,3,4,5)
+				  val word = "###"
+				  val fun = new orFun
+				  fun.getAgain(list,word)
+				}
+3. 模式匹配（重点）
+	1. 模式匹配基本语法  match case
+	Scala中是没有Java中的Switch case语法的，相对应的，Scala提供了比java更强大匹配方式，match case ，也就是模式匹配，用match case 来代替java的switch case。
+	java中进行匹配的话需要自己定义跳出循环的break，而scala中不需要，它只会匹配一个结果，并且scala的匹配类型要比java的多的多，它可以匹配集合，数据、元组、string等等。。
+	
+	Scala的模式匹配之所以强大，是因为可以直接匹配类型，而不是值，这点Java做不到。
+	
+	样例类：语法 case class  一般都结合模式匹配使用，如果我们使用样例类的话，可以不需要New这个类，直接调用，并且也可以不实现序列化操作
+	样例类和Object的最大的区别就是在于Object不可以传入参数列表，而样例类是可以传入参数列表
+	
+				object match_string extends App {
+
+				  val str = "for"
+				  str match {
+					case "one" => println("one")
+					case "two" => println("two")
+					case "three" => println("three")
+					case _ => println("what the fuck?")
+				  }
+				}
+
+				object matchs_Array extends App {
+				  val arr = Array(1,2,3,4,5)
+				  arr match {
+					case Array(x,y,z) => println("three")
+					case Array(1,_*) => println("begain with 1")
+					case Array(1,2,3,x,y) => println(s"${x + y}")
+					case _ => println("what?")
+				  }
+				}
+
+				object matchs_List extends App {
+				  val list = List(6,2,4,8)
+				  list match {
+					case 1::Nil => println("only 1")
+					case 1::2::3::Nil => println("集合中含有1,2,3")
+					case 1::tail => println("begain with 1")
+					case x::2::z::tail => println("某个位置为 2")
+					case _ => println("else")
+				  }
+				}
+
+				object match_tuple extends App {
+				  val tup = (1,2,3)
+				  tup match {
+					case (_,x,3) => print("1")
+					case (1,2,3) => println("2")
+					case (1,x,y) => println("3")
+					case _ => println("else")
+
+				  }
+				}
+	Option类型
+	Some 代表有值的意思
+	None 代表空值的意思
+	 在Map中进行取值的时候，会反回Option类型
+				
+				object optionsDemo extends App {
+				  val m1 = Map("nancy" -> 16, "tom" -> 18, "leo" -> 17)
+				  val op: Option[Int] = m1.get("leos")
+				  op match {
+					  //somes用于接收op的值
+					case Some(somes) => println(somes)
+					case None => println("nothing")
+				  }
+				}
+	 
+	偏函数：被包在花括号内，没有match关键字的一组case 语句，就是一个偏函数，它是PartialFunction[A,B]一个实例 A 代表 参数类型， B 代表返回类型
+			---------->    相当于partialFunction 代替了match 
+				object sideVal {
+				  def f1:PartialFunction[String,Int] = {
+					case "A" => 1
+					case "B" => 2
+					case "C" => 3
+					case _ => 999
+				  }
+				}
+				object Demo {
+				  def f2(value:String): Int = value match {
+					case "A" => 1
+					case "B" => 2
+					case "C" => 3
+					case _ => 999
+				  }
+				}
+
+				object test extends App {
+				  println(sideVal.f1("A"))
+				  println(Demo.f2("E"))
+				}
+	
+4.  泛型（了解）
+	其实泛型就是对类型的一种约束
+	上边界  <:  S <: T  泛型类型必须是某个类的子类 
+	案例：比较器使用
+	下边界  >:  S >: T  泛型类型必须是某个类的父类
+	案例：领取身份证（父子）
+	上下边界 View Bounds
+	
+	Context Bounds
+	
+	

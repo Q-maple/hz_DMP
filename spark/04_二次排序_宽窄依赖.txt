@@ -1,0 +1,24 @@
+1. Spark的二次排序
+	1. 按照文件第一列进行排序
+	2. 如果第一列相同，则按照第二列排序
+2. Spark的分组取TopN
+	先分组，在取TopN
+
+3. 宽窄依赖（Shuffle）
+	窄依赖：一个RDD对它的父RDD，只有一个兼得一对一依赖关系，也就是说，RDD每个Partition，仅仅依赖于父RDD中的一个Partition，父RDD和子RDD之间的Partition关系是一对一。
+	举例：一个父亲一个孩子
+	宽依赖：每个父RDD的Partition的数据，都传输到多个子RDD中的Partition里，此时就会发生错综复杂的现在，这样叫宽依赖
+	举例一个父亲多个孩子
+	
+	Task：每个任务（Partition）
+	Stage：阶段（划分依据Shuffle或者说宽窄依赖）
+	Partition：RDD中分配的Task任务
+	TaskSet：对象（包含了所有Task）
+	Job：一个Action操作就是一个Job任务提交
+4. 血缘
+	实现RDD与RDD之间的一个容错性（RDD的分区）
+	
+5. Spark的案例练习
+	1. Ip解析案例
+	2. 基站案例
+6. Executor原理

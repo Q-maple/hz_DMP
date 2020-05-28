@@ -1,0 +1,36 @@
+1. Spark SQL简介
+	集成性：Spark SQL允许你用SQL的DataFrameAPI来操作Spark程序，可以支持Java、Scala、Python、R。
+	统一数据访问性：可以使用DataFrame的SQL形式，进行统一的访问，包括hive、Parquet、JSON、JDBC。
+	集成Hive：Spark-SQL支持HiveQL语句和UDF，允许你访问Hive仓库
+	连通性：连接ODBC和JDBC
+
+2. DataFrame概念
+	DF是Spark SQL的API的一种实现对象，也可以说DF是封装了Spark Core的一种体现，它可以在Spark程序上，用SQL的形式进行运行，而内部其实还是要转换RDD处理的，说白了，就是对RDD的一种封装。
+
+3. 创建DataFrame
+	通过读取文件的方式
+	文件的读取
+	.read.format().load()
+	.read.json()...各种格式
+	写类似
+
+4. DataFrame的操作
+	DataFrame是在1.3以后推出的一个全新的概念，可以直接使用SQL对数据的处理，然后在1.3-1.6都是DataFrame处理方案，到1.6以后推出的DataSet
+	1. 一系列的API操作
+	2. 将RDD转换DF（RDD与DF之间可以随意转换）
+	为什么要将RDD转换DF？因为这样的话，我们就可以针对数据，构建表，可以直接使用SQL进行查询处理，这个功能很强大的，针对HDFS数据，直接使用SQL处理。
+	
+5. 创建DF的两种方式
+	1. 通过反射的方式：使用反射的方式其实比较编程接口的话，代码比较简单些，可以传入一个外部类。
+	
+	2. 通过编程接口方式：代码相比较反射的话，比较多一些，但是这种方式不需要你使用外部的一些类，来传参，可以直接在内部通过StructType的形式，赋予参数和类型。
+	
+6. 通用数据源load和save
+	load和save默认都是读取parquet文件格式，因为parquet文件格式读取效率高，并且是列式存储。
+	如果想要改变读取默认格式，使用format方法来进行更改
+	sqlcontext.read.format().load()
+	sqlcontext.read.option("mergeschema","true").parquet() 可以合并parquet文件读取
+	
+7. Spark的内置函数
+	DSL（将我们的SQL分解开来，变成一个一个的方法来处理的风格）
+	SQL（它就是执行SQL语句就行）

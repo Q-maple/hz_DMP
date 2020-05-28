@@ -1,0 +1,43 @@
+1. Kafka简介
+	Kafka是用Scala语言开发的，是Apache的项目，它叫消息中间件或消息队列，用于暂时性存储数据，处理流式数据的组件。
+	主要作用：流式数据的传输，消息的缓存
+	组件：
+	1. 生产者：Producer，消息生产的源头。负责往kafka服务器发送数据
+	2. 消费者：Consumer，数据消费方，负责消费kafka的数据
+	3. 主题：Topic，它是有用户创建的，用于建立kafka的生产者和消费者之间的订阅关系，发送消息到Topic和消费Topic数据
+	4. 分区：Partition，一个Topic下面客户源创建很多分区。
+	5. Broker：kafka的服务器，用于存储数据信息的
+	6. 消费者组：Group，用于 归类同一消费者，在kafka中，多个消费者可以共同消费一个Topic下的消息，用于同一个组名。
+	消费者组可以消费一个或者多个分区的数据，相反一个分区的数据同一时刻只能被一个消费者消费（不允许重复消费）
+	7. Offset：偏移量，消费数据的时候， 都是根据这个偏移量来消费的
+
+2. Kafka集群搭建
+	1. Kafka集群可以保存多种类型数据，每个条数据都会保存到这个集群中的Topic下
+	2. 集群可以创建多个Topic
+	3. Topic可以有多个副本，多个分区，这些分区数都是我们手动指定的（默认1）
+	使用场景：做实时流处理的时候（最多）
+3. Kafka命令
+	kafka的元数据保存在zookeeper中
+	kafka默认保存七天时间
+	1. 新建主题：./bin/kafka-topics.sh --create --zookeeper 192.168.28.131:2181 --replication-factor 3 --partitions 3 --topic hz1803a
+	2. 查看所有主题：./bin/kafka-topics.sh --list --zookeeper 192.168.142.100:2181
+	3. 查看主题详情：./bin/kafka-topics.sh --describe --zookeeper 192.168.142.100 --topic hz1803
+	Kafka的进程没有主从区别，而它下面的Topic里的Partition是有主从之分的，也就说ZK选举机制辅助与每个Topic下Partition进行选举操作
+	4. 删除Topic：./bin/kafka-topics.sh --delete --zookeeper 192.168.28.131:2181 --topic hz1803
+	在做删除的时候，需要指定一个参数，delete.topic.enable = true
+	5. 修改分区：只能增加不能减少
+	kafka-topics.sh --alter --zookeeper 192.18.28.131:2181 -- partitions 5 --topic hz1803a
+	6. 启动生产者：
+	./bin/kafka-console-producer.sh --broker-list 192.168.142.100:9092 --topic kfk
+	7. 启动消费者：
+	./bin/kafka-console-consumer.sh --zookeeper 192.168.142.101:2181 --topic kfk --from-beginning
+	
+4. KafkaAPI操作（了解）
+
+
+5. Kafka分区和消费者的关系（了解）
+	RoundRobinAssignor（消费者 消费数据的算法）轮循
+	
+6. 文件存储机制（重点）
+	
+

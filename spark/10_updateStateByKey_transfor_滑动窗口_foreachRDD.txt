@@ -1,0 +1,42 @@
+1. UpdataStateByKey和MapwithState介绍、操作、区别（重点）
+	UpdataStateByKey和MapwithState都是用来做累加运算的，如果我们想要累加每次批次的结果数据，得到最终的一个聚合结果数据，需要使用这两个方法来操作，两种都可以实现
+	UpdataStateByKey是原始版本的，可以让我们为每个Key维护一份State，并持续不断的更新这个State，对于每个batch，Spark都会为每个之前已经存在的Key去应用一次state更新函数，无论这个Key在batch中是否有新的数据，使用的话，必须开启checkpoint机制
+	MapwithState是新版的，先进行内存存储，放入缓存，如果缓存没有的话，再去磁盘求值，然后根据更新规则，如果上一次的数据和这次提交更新的数据相比，不存在，那么将被删除掉，减少输出数据，当下一次有了这个值，回去内存读取之前存储的值（操作要比Updata复杂），多数用于数据量不是很大的
+	应用场景：做每个批次的结果累加
+
+    //mapwithstate测试
+    def mappingFunc(key: String, value: Option[String], state: State[String]): (String,String) = {
+      val sumed = value.getOrElse(0) + state.getOption().get
+      val result = (key,sumed)
+      state.update(sumed)
+      result
+    }
+    val function = StateSpec.function(mappingFunc _)
+
+    values.mapWithState(function)
+2. Transform介绍、操作（重点）
+	Transform可以用于执行任意的RDD到RDD的转换操作，它可以用于实现DStreamAPI中没有提供的一些操作
+
+3. 滑动窗口 reduceByKeyAndWindow （侧重点）
+	滑动窗口滑动的时长和间隔是我们批次提交的Job时间的倍数，或者本身，滑动窗口可以提供每次滑动的时长超于每次的批次Job时间，也就说说在应该过程中，统计更加灵活
+	
+	//滑动窗口测试
+    val values: DStream[(String, String)] = kafka_data.map(t=>(t.key(),t.value()))
+    val res = values.reduceByKeyAndWindow((v1:String,v2:String)=>v1 + v2,Seconds(6),Seconds(3))
+    res.foreachRDD(f=>{
+      f.foreachPartition(t=>{
+        t.foreach(println)
+      })
+    })
+	
+4. foreachRDD和JDBC连接池
+	如果当我们在实时统计存储使用Connection连接的话，需要调用内部的foreachRDD方法，来进行RDD的转换存储，然后在内部创建连接，之后执行SQL语句就可以了
+	foreachRDD和Transform区别？
+	foreach和Transform同样都是对流式数据进行RDD的算子转换操作的，但是不同的在于foreachRDD是无返回值的，直接进行数据的输出或者存储，而transform是对流式数据的RDD转换操作，内部需要RDD的返回值操作。
+
+5. SparkStreaming直连方式操作（zk管理Offset） 
+
+6. Kafka0.10版本的安装介绍，和0.8的区别
+
+
+

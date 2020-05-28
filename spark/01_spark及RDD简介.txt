@@ -1,0 +1,36 @@
+1. Spark概念（介绍）
+	2009年推出  2010开源  2013年才成为Apache当中的一员  2014年正式应用（成顶级项目）
+	Spark-Core、Spark-SQL、Spark-Streaming、Spark-MLLib、Spark-Graphx
+	Spark基于内存、迭代式运算、可以弥补MapReduce的计算不足之处
+	开发团队：辛湜（人）
+	Spark的计算框架应用
+	
+2. Spark特性
+	1. 快  相比较hadoop来说，要快上100倍（内存）
+	2. 易用性 可以支持多种语言进行开发（Java、Scala、R、Python、SQL）
+	3. 通用性 他提供了SQL的统一解决方案，可以进行GraphX、MLLib、Spark SQL、Spark Streaming的开发
+	4. 兼容性 兼容Hive、Hbase、HDFS、Kafka等等。。。
+3. Spark的入门演示（集群和Web UI介绍）（重点）
+	通过对集群操作，启动Spark-Shell测试
+	求Pi演示和介绍WebUI
+
+4. 编写入门案例（WordCount）
+	版本问题：
+		如果用spark1.6.X的话，那么它的对应Scala版本就是2.10.X，SDK版本和Scala版本要一样
+		如果用Spark2.X以上的版本，那么它对应的版本就是Scala2.11.X以上，SDK版本和Scala版本要一样
+		如果你用的是最高版本，那么对应的Scala是2.12.X以上，SDK版本和Scala版本要一样
+	Java版
+	Scala版
+	reduceBykey (通过key聚合value)算子中 括号中需要传入聚合的方法(如 + 等)
+	
+5. RDD（重点）
+	什么是RDD？
+	弹性分布式数据集
+	Resilient Distributed Dataset
+	是Spark的数据抽象，他代表一个不可变、可分区、里面的元素可并行计算的集合
+	Represents an immutable,
+	partitioned collection of elements that can be operated on in parallel.
+	
+	RDD是一个数据抽象，一个RDD中有多个分区，一个分区在Executor节点上执行时，他就是一个迭代器
+	
+	一个RDD有多个分区，一个分区肯定在一台机器上，但是一台机器可以有多个分区，我们要操作的是分布在各个机器上的数据，而RDD相当于这些数据的代理，对RDD操作其实就是对每个分区操作，对每个分区操作，其实就是对数据操作。

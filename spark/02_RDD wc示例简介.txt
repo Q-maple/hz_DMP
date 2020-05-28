@@ -1,0 +1,52 @@
+1. 配置Spark的后台Log（History）（重点）
+	配置spark-default.xml  
+						spark.eventLog.enabled           true
+						spark.eventLog.dir               hdfs://centos:9000/directory
+	配置spark-env.sh
+						export SPARK_MASTER_IP=centos
+						export SPARK_MASTER_PORT=7077
+						export SPARK_HISTORY_OPTS="-Dspark.history.ui.port=4000 -Dspark.history.retainedApplications=10 -Dspark.history.fs.logDirectory=hdfs://centos:9000/directory"
+						SPARK_HISTORY_UI_PORT=4000
+						SPARK_HISTORY_FS_LOGDIRECTORY=hdfs://centos:9000/directory
+						SPARK_HISTORY_RETAINEDAPPLICATIONS=10
+	课上配置（看视频）
+	如果你是1.6.X  不需要配置这样个东西，因为内部自带
+	如果是2.X的需要自己配置一个后台log
+2. RDD的五大特性（重点）
+   一系列分区就是一个数据集
+						如果分区数少于block数量,那么一个分区对应多个block块
+						最少一个分区对应一个block
+						通常block数量大于分区数
+						如果分区数多于block数量,那么多的分区在计算时会进行陪跑(如果并行计算时其中一个有数据,如果都没有数据那么不会运算,也就是不会陪跑)
+   A list of partitions 
+   
+   函数作用在每一个分区上
+   A function for computing each split
+   
+   RDD之间有依赖关系 : 指后面的RDD是前面RDD的子类,该RDD计算出现问题时会从父类RDD找回数据并且进行重新计算(只会重新计算该分区,其他分区不受影响)
+   A list of dependencies on other RDDs
+   
+   如果RDD里的Partition的数据是Key-Value形式的，会有HashPartition（分区器）(使用数据的值进行哈希取值,然后和分区数取模决定分区存放位置),也是默认的分区器,(可能会产生哈希碰撞)
+   Optionally, a Partitioner for key-value RDDs (e.g. to say that the RDD is hash-partitioned)
+   
+   如果读取的数据是HDFS数据时候，会有一个最佳位置（本地化级别（五种））
+   Spark在进行任务调度的时候，会尽可能的将计算任务分配到所要处理数据的位置
+   移动数据不如移动计算
+   Optionally, a list of preferred locations to compute each split on (e.g. block locations for
+   an HDFS file)
+
+3. WC的原理实现（重点）
+
+
+4. RDD的API（重点）
+	Action：立即运行
+	
+	Transformation：转换算子  (如果程序最后没有action算子获取结果的话前面的transformation是不会执行的,而只是做了标记引用而已,利用了scala中的lazy特性,从而优化代码,)
+	map、flatMap、filter、mapValue、sortBy、reduceByKey、union、Distinct、join、leftOuterJoin、PartitionBy、groupByKey、aggregateByKey、makeRDD、textFile
+	Action算子是立即出发任务的算子，触发一个Job，而Transformation算子是一个转换操作的算，如果我们想让转换算子进行运行的话，必须执行一个Action算子。
+	当我们进行算子调用的时候，返回值是RDD的话，都是转换算子操作（sortByKey sortBy会触发Job，但是是Transformation），如果想要Transformation算子得到具体的结果值，必须触发Action算子操作，那么Action子的返回值就是结果值
+	
+	提交作业时可以添加--jars 添加缺少的jar包
+	--deploy-mode 设置模式 : standalone/spark on yarn/local
+
+	

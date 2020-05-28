@@ -1,0 +1,61 @@
+1. 内置函数
+	开窗函数（重点）
+	一 、什么是开窗函数，开窗函数有什么作用，特征是什么？
+		所谓开窗函数就是定义一个行为列，简单讲，就是在你查询的结果上，直接多出一列值（可以是聚合值或是排序号），特征就是带有over（）。
+
+	二、开窗函数分类
+
+		根据使用的目的，开窗函数可以分为两类：聚合开窗函数和排序开窗函数。
+	RowNumber
+	Rank
+	相当于伪列，伪列就是在你的表内部添加了一条新的列，但是这个列式不存在，可以看到他存在，但是你想要的使用这个列的话，必须把它当成一个结果集来用。
+	
+	UDF和UDAF
+	UDF：定义和注册（重点）
+			val fun1 = (str:String) => {
+			  str.length
+			}
+			spark.udf.register("len",fun1)
+	UDAF：定义和注册（了解）
+2. 2.X版本新特性（DataSet）
+	在Spark2.0版本最重要的区别在于DataSet整合DataFrame和RDD的API操作，并且将之前的DataFrame变成了别名（DataSe[Row] = DataFrame），在性能方面得到提醒，主要是底层的内存模型模型发生改变，并且其他的一些组件也推出了新的API和特性(比如：MLLib和GraphX)
+	
+	新的特性
+	Type和Untyped（了解）
+	Type：map、filter、foreach。。。
+	Untyped（其实就是将SQL中的语句弄成了方法进行处理）：Select、where、groupBy、agg、join。。
+	
+	dataframe/dataset/rdd互相转换
+	dataframe --> dataset : df.as[一个样例类] 导入隐式转换包
+	dataframe --> rdd  : df.rdd
+	dataset --> rdd : ds.rdd
+	dataset --> dataframe : ds.toDF 需要导入隐式转换包
+	rdd --> ds : sparksession.createdataset(rdd)  rddmap数据对数据进行处理然后银蛇到指定的类
+					val splited = file.rdd.map(t=>{
+					  person(t.split("\\s")(0),t.split("\\s")(1))
+					})
+				rdd.tods
+	rdd --> df : 反射&编程接口两种形式
+
+3. 案例练习
+
+
+4. Hive on Spark（重点）
+	三个配置文件core-site.xml/hdfs-site.xml/yarn-site.xml
+	配置读取Hive数据
+	
+	System.setProperty("hadoop.home.dir", "D:\\Huohu\\下载\\hadoop-common-2.2.0-bin-master")
+//    val conf = new SparkConf().setAppName("hive").setMaster("local")
+//    val sc = new SparkContext(conf)
+//    val hc = new HiveContext(sc)
+    val hc = SparkSession.builder().enableHiveSupport().appName("hive").master("local").getOrCreate()
+    val df = hc.sql("select * from qfbap_ods.ods_user")
+    df.write.mode("").insertInto("")
+	
+	
+	
+5.sparksql
+	可以启动spark的sbin目录下的spark-thrift.sh代替hive hiveserver2服务 ,然后直接 调用spark-thrift.sh就可以启用hive
+	可以使用bin下面的sparksql直接使用相当于hive直接使用hive,会打印很多日志信息
+	
+

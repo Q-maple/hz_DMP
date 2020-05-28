@@ -1,0 +1,23 @@
+1. RDD的API（重点）
+	Action：立即运行
+	reduce(聚合)、collect(收集数据到driver端)、take(获取前...)、top(底层会调用takeordered,会对数据按key进行排序,并取出来最大的前x个数据)、count、saveAsTextFile、foreach、countByKey、sum、first,	 takeOrdered(和top算子相反,从小取值)
+	Transformation：转换算子  
+	map、flatMap、filter、mapValue、sortBy、reduceByKey、union、Distinct、join、leftOuterJoin、PartitionBy(会将相同的key放在一个分区)、groupByKey、aggregateByKey、makeRDD、textFile、cogroup、Mappartitions、Coalesce、RePartition
+	
+	每一个算子产生的rdd都会存储在内存中
+	sortBykey内部触发job 其内部的rdd会清空
+	提交一个job一个节点上有5个task10个core的话,那么再提交一个同样的job会再产生一个executor
+	
+2. 持久化RDD（重点）内存分配 ---> 缓存占用60% /计算任务占用20%(shuffle时会大量占用)/20%存储元数据
+	RDD的持久化，表示将当前的需要持久化的数据，放入内存中，如果内部有复用的RDD，将不需要重新计算，直接从持久化的地方取值，这样可以大大减少计算时间，提高效率
+	cache：底层调用的是Persist，只有一种缓存级别（内存一份）
+	persist：有默认的缓存级别（Memory），但是可以进行更改（还有多种缓存级别  --->  磁盘/内存/磁盘+内存   1/2份 是否序列化    还有无级别/堆外内存）
+
+3. 共享变量（重点）
+	1. 广播变量  Broadcast(只读的/类型可以是文件/string等)
+	Spark内部提供这样一个变量，它是一个只读。在每一个节点上会有一份变量，这份变量被广播的一般都是外部变量，用来减少磁盘IO和网络IO
+	2. 累加器 Accumulate 
+	累加各个节点上的Task的共享变量
+
+4. Spark的内核原理（任务提交流程）（重点中的重点）（背下来）
+
